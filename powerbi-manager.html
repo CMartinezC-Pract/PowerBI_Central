@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PowerBI Dashboard Manager</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0e27;
+            --bg-secondary: #151a33;
+            --bg-card: #1a1f3a;
+            --accent-1: #00d9ff;
+            --accent-2: #7b2cbf;
+            --accent-3: #ff006e;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(123, 44, 191, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(0, 217, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(255, 0, 110, 0.08) 0%, transparent 50%);
+        }
+
+        /* Header */
+        header {
+            background: rgba(26, 31, 58, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--accent-1);
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+            color: white;
+            box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(123, 44, 191, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* View Switcher */
+        .view-container {
+            min-height: calc(100vh - 200px);
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .dashboard-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-1);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.2);
+        }
+
+        .dashboard-folio {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
+            color: white;
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .dashboard-description {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+        }
+
+        /* Viewer */
+        .viewer-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .viewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .viewer-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .iframe-container {
+            width: 100%;
+            height: 80vh;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .iframe-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Form Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid var(--accent-1);
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-3);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            color: var(--accent-1);
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-1);
+        }
+
+        .form-textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            position: relative;
+            margin-top: 2rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.2rem 1.5rem 1.2rem 3.5rem;
+            background: var(--bg-card);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-1);
+            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: var(--success);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .success-message.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        /* Section Title */
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 2rem 1.5rem;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-animation"></div>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="bi bi-bar-chart-fill"></i>
+            PowerBI Manager
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-primary" onclick="showAddDashboard()">
+                <i class="bi bi-plus-circle"></i> Agregar Dashboard
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard List View -->
+        <div id="listView" class="view active">
+            <h1 class="section-title">Mis Dashboards</h1>
+            <p class="section-subtitle">Gestiona y visualiza todos tus reportes de Power BI en un solo lugar</p>
+
+            <!-- Search Bar -->
+            <div class="search-bar">
+                <i class="bi bi-search search-icon"></i>
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput"
+                    placeholder="Buscar por folio o nombre del dashboard..."
+                    oninput="filterDashboards()"
+                >
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid" id="dashboardGrid">
+                <!-- Dashboards will be rendered here -->
+            </div>
+
+            <div class="empty-state" id="emptyState" style="display: none;">
+                <i class="bi bi-inbox"></i>
+                <h3>No hay dashboards disponibles</h3>
+                <p>Agrega tu primer dashboard para comenzar</p>
+            </div>
+        </div>
+
+        <!-- Viewer View -->
+        <div id="viewerView" class="view">
+            <div class="viewer-container">
+                <div class="viewer-header">
+                    <div class="viewer-info">
+                        <button class="btn btn-secondary btn-small" onclick="showList()">
+                            <i class="bi bi-arrow-left"></i> Volver
+                        </button>
+                        <span class="dashboard-folio" id="viewerFolio"></span>
+                        <h2 class="viewer-title" id="viewerTitle"></h2>
+                    </div>
+                    <button class="btn btn-danger" onclick="showReportIssue()">
+                        <i class="bi bi-exclamation-triangle"></i> Reportar Problema
+                    </button>
+                </div>
+                <div class="iframe-container">
+                    <iframe id="dashboardFrame" src=""></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Dashboard Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAddModal()">&times;</button>
+            <h2 class="section-title" style="font-size: 2rem; margin-bottom: 2rem;">Agregar Dashboard</h2>
+            <form onsubmit="addDashboard(event)">
+                <div class="form-group">
+                    <label class="form-label">Folio</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="addFolio"
+                        placeholder="Ej: DB-001"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre del Dashboard</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="addNombre"
+                        placeholder="Ej: Ventas Regionales Q4"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción (Opcional)</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="addDescripcion"
+                        placeholder="Breve descripción del dashboard"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">URL del Dashboard (Power BI)</label>
+                    <input 
+                        type="url" 
+                        class="form-input" 
+                        id="addUrl"
+                        placeholder="https://app.powerbi.com/reportEmbed?reportId=..."
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="bi bi-check-circle"></i> Guardar Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Report Issue Modal -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeReportModal()">&times;</button>
+            <h2 class="section-title" style="font-size: 2rem; margin-bottom: 2rem;">Reportar Problema</h2>
+            <form onsubmit="submitReport(event)">
+                <div class="form-group">
+                    <label class="form-label">Folio del Dashboard</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="reportFolio"
+                        disabled
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Nombre del Dashboard</label>
+                    <input 
+                        type="text" 
+                        class="form-input" 
+                        id="reportNombre"
+                        disabled
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Descripción del Problema</label>
+                    <textarea 
+                        class="form-textarea" 
+                        id="reportDescripcion"
+                        placeholder="Describe detalladamente el problema que encontraste..."
+                        required
+                    ></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Tu Email (Opcional)</label>
+                    <input 
+                        type="email" 
+                        class="form-input" 
+                        id="reportEmail"
+                        placeholder="tu@email.com"
+                    >
+                </div>
+                <button type="submit" class="btn btn-danger" style="width: 100%;">
+                    <i class="bi bi-send"></i> Enviar Reporte
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Message -->
+    <div id="successMessage" class="success-message">
+        <i class="bi bi-check-circle-fill" style="font-size: 1.5rem;"></i>
+        <span id="successText">Operación exitosa</span>
+    </div>
+
+    <script>
+        // Data Storage
+        let dashboards = [];
+        let currentDashboard = null;
+
+        // Load from localStorage
+        function loadDashboards() {
+            const saved = localStorage.getItem('powerbi_dashboards');
+            if (saved) {
+                dashboards = JSON.parse(saved);
+            } else {
+                // Sample data
+                dashboards = [
+                    {
+                        folio: 'DB-001',
+                        nombre: 'Ventas Regionales',
+                        descripcion: 'Análisis de ventas por región y trimestre',
+                        url: 'https://app.powerbi.com/reportEmbed?reportId=950ee71c-95ac-4931-b153-dd0505ae6049&autoAuth=true&ctid=5539201f-944b-4a7f-a1b7-d6e298fbe803'
+                    }
+                ];
+                saveDashboards();
+            }
+            renderDashboards();
+        }
+
+        // Save to localStorage
+        function saveDashboards() {
+            localStorage.setItem('powerbi_dashboards', JSON.stringify(dashboards));
+        }
+
+        // Render dashboards
+        function renderDashboards() {
+            const grid = document.getElementById('dashboardGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (dashboards.length === 0) {
+                grid.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            grid.style.display = 'grid';
+            emptyState.style.display = 'none';
+            
+            grid.innerHTML = dashboards.map(db => `
+                <div class="dashboard-card" onclick="viewDashboard('${db.folio}')">
+                    <span class="dashboard-folio">${db.folio}</span>
+                    <h3 class="dashboard-title">${db.nombre}</h3>
+                    <p class="dashboard-description">${db.descripcion || 'Sin descripción'}</p>
+                    <div class="dashboard-actions">
+                        <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); viewDashboard('${db.folio}')">
+                            <i class="bi bi-eye"></i> Ver
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="event.stopPropagation(); deleteDashboard('${db.folio}')">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Filter dashboards
+        function filterDashboards() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.dashboard-card');
+            
+            cards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(search) ? 'block' : 'none';
+            });
+        }
+
+        // View dashboard
+        function viewDashboard(folio) {
+            currentDashboard = dashboards.find(db => db.folio === folio);
+            if (!currentDashboard) return;
+
+            document.getElementById('viewerFolio').textContent = currentDashboard.folio;
+            document.getElementById('viewerTitle').textContent = currentDashboard.nombre;
+            document.getElementById('dashboardFrame').src = currentDashboard.url;
+
+            showViewer();
+        }
+
+        // Add dashboard
+        function addDashboard(event) {
+            event.preventDefault();
+            
+            const folio = document.getElementById('addFolio').value.trim();
+            const nombre = document.getElementById('addNombre').value.trim();
+            const descripcion = document.getElementById('addDescripcion').value.trim();
+            const url = document.getElementById('addUrl').value.trim();
+
+            // Check if folio exists
+            if (dashboards.some(db => db.folio === folio)) {
+                alert('Ya existe un dashboard con ese folio');
+                return;
+            }
+
+            dashboards.push({ folio, nombre, descripcion, url });
+            saveDashboards();
+            renderDashboards();
+            closeAddModal();
+            showSuccess('Dashboard agregado correctamente');
+
+            // Clear form
+            event.target.reset();
+        }
+
+        // Delete dashboard
+        function deleteDashboard(folio) {
+            if (confirm('¿Estás seguro de eliminar este dashboard?')) {
+                dashboards = dashboards.filter(db => db.folio !== folio);
+                saveDashboards();
+                renderDashboards();
+                showSuccess('Dashboard eliminado');
+            }
+        }
+
+        // Submit report
+        function submitReport(event) {
+            event.preventDefault();
+            
+            const reporte = {
+                folio: document.getElementById('reportFolio').value,
+                nombre: document.getElementById('reportNombre').value,
+                descripcion: document.getElementById('reportDescripcion').value,
+                email: document.getElementById('reportEmail').value,
+                fecha: new Date().toISOString()
+            };
+
+            console.log('Reporte enviado:', reporte);
+            
+            // Here you would send to your backend
+            // For now, just save to localStorage
+            const reportes = JSON.parse(localStorage.getItem('powerbi_reportes') || '[]');
+            reportes.push(reporte);
+            localStorage.setItem('powerbi_reportes', JSON.stringify(reportes));
+
+            closeReportModal();
+            showSuccess('Reporte enviado correctamente');
+            event.target.reset();
+        }
+
+        // Show/Hide Views
+        function showList() {
+            document.getElementById('listView').classList.add('active');
+            document.getElementById('viewerView').classList.remove('active');
+            document.getElementById('dashboardFrame').src = '';
+        }
+
+        function showViewer() {
+            document.getElementById('listView').classList.remove('active');
+            document.getElementById('viewerView').classList.add('active');
+        }
+
+        // Modals
+        function showAddDashboard() {
+            document.getElementById('addModal').classList.add('active');
+        }
+
+        function closeAddModal() {
+            document.getElementById('addModal').classList.remove('active');
+        }
+
+        function showReportIssue() {
+            if (!currentDashboard) return;
+            
+            document.getElementById('reportFolio').value = currentDashboard.folio;
+            document.getElementById('reportNombre').value = currentDashboard.nombre;
+            document.getElementById('reportModal').classList.add('active');
+        }
+
+        function closeReportModal() {
+            document.getElementById('reportModal').classList.remove('active');
+        }
+
+        // Success message
+        function showSuccess(message) {
+            const msg = document.getElementById('successMessage');
+            document.getElementById('successText').textContent = message;
+            msg.classList.add('active');
+            setTimeout(() => {
+                msg.classList.remove('active');
+            }, 3000);
+        }
+
+        // Close modals on background click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        }
+
+        // Initialize
+        loadDashboards();
+    </script>
+</body>
+</html>
