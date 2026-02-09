@@ -1,151 +1,260 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Reportar Problema</title>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Reportar Problema - Dashboard</title>
 
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
-            background: transparent;
-            color: #101010;
             font-family: 'Lato';
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
-
-        .content-wrapper {
-            background: #f6fce9;
+        .report-container {
+            max-width: 700px;
+            margin: 0 auto;
+            background: white;
             border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
         }
-
-        .section-title {
-            color: #1a2a09;
-            font-weight: 700;
+        .report-header {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
         }
-
-        .section-subtitle {
-            color: #3f5a1a;
+        .report-body {
+            padding: 30px;
         }
-
-        .form-control,
-        .form-select {
+        .dashboard-info {
+            background: #f8f9fa;
+            padding: 20px;
             border-radius: 8px;
+            margin-bottom: 30px;
         }
-
-        .folio-badge {
-            background: #bbe373;
-            color: #1a2a09;
+        .form-label {
             font-weight: 600;
+            color: #495057;
         }
-
-        .btn-enviar {
-            background: #77dd77;
-            color: #101010;
+        .required:after {
+            content: " *";
+            color: #dc3545;
+        }
+        .btn-submit {
+            background: #dc3545;
+            color: white;
+            padding: 12px 30px;
             font-weight: 600;
             border: none;
         }
+        .btn-submit:hover {
+            background: #c82333;
+        }
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-back:hover {
+            background: #5a6268;
+        }
     </style>
 </head>
-
 <body>
-    <main class="container py-4">
-        <div class="content-wrapper p-4">
 
-            <h2 class="section-title mb-1">
-                <i class="bi bi-exclamation-triangle"></i> Reportar Problema
-            </h2>
+<div class="report-container">
+    <div class="report-header">
+        <h2><i class="bi bi-exclamation-triangle-fill"></i> Reportar Problema</h2>
+        <p class="mb-0">Ayúdanos a mejorar reportando cualquier inconveniente</p>
+    </div>
 
-            <p class="section-subtitle mb-4">
-                Ayúdanos a mejorar reportando cualquier inconveniente con el dashboard
-            </p>
+    <div class="report-body">
+        <!-- INFO DEL DASHBOARD -->
+        <div class="dashboard-info">
+            <h5 class="mb-3"><i class="bi bi-info-circle"></i> Dashboard a reportar</h5>
+            <p class="mb-1"><strong>Folio:</strong> <span id="dashboardFolio">Cargando...</span></p>
+            <p class="mb-1"><strong>Nombre:</strong> <span id="dashboardNombre">Cargando...</span></p>
+            <p class="mb-0"><strong>Responsable:</strong> <span id="dashboardResponsable">Cargando...</span></p>
+        </div>
 
-            <!-- FOLIO -->
-            <div class="mb-3">
-                <label class="form-label">Folio del Dashboard</label><br>
-                <span class="badge folio-badge" id="folioLabel">---</span>
-                <input type="hidden" id="folioInput">
+        <!-- FORMULARIO -->
+        <form id="reportForm">
+            <!-- Tipo de Problema -->
+            <div class="mb-4">
+                <label for="tipoProblema" class="form-label required">Tipo de Problema</label>
+                <select class="form-select" id="tipoProblema" required>
+                    <option value="">Seleccione un tipo de problema</option>
+                    <option value="Datos incorrectos">Datos incorrectos</option>
+                    <option value="Dashboard no carga">Dashboard no carga</option>
+                    <option value="Error de visualización">Error de visualización</option>
+                    <option value="Información desactualizada">Información desactualizada</option>
+                    <option value="No tengo permisos de acceso">No tengo permisos de acceso</option>
+                    <option value="Otro problema">Otro problema</option>
+                </select>
             </div>
 
-            <!-- FORMULARIO -->
-            <form onsubmit="enviarReporte(event)">
+            <!-- Nombre -->
+            <div class="mb-4">
+                <label for="nombreReportante" class="form-label required">Tu Nombre</label>
+                <input type="text" class="form-control" id="nombreReportante" placeholder="Nombre completo" required>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Tipo de problema</label>
-                    <select class="form-select" id="tipo" required>
-                        <option value="">Selecciona una opción</option>
-                        <option>Datos incorrectos</option>
-                        <option>Dashboard no carga</option>
-                        <option>Error de visualización</option>
-                        <option>Información desactualizada</option>
-                        <option>Otro</option>
-                    </select>
-                </div>
+            <!-- Correo -->
+            <div class="mb-4">
+                <label for="correoReportante" class="form-label required">Tu Correo</label>
+                <input type="email" class="form-control" id="correoReportante" placeholder="correo@xcaret.com" required>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Descripción del problema</label>
-                    <textarea class="form-control" id="descripcion" rows="4"
-                        placeholder="Describe el problema con el mayor detalle posible..."
-                        required></textarea>
-                </div>
+            <!-- Descripción -->
+            <div class="mb-4">
+                <label for="descripcion" class="form-label">Descripción del Problema (Opcional)</label>
+                <textarea class="form-control" id="descripcion" rows="4" 
+                    placeholder="Proporciona detalles adicionales que puedan ayudar a resolver el problema..."></textarea>
+                <div class="form-text">Máximo 500 caracteres</div>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Tu correo (opcional)</label>
-                    <input type="email" class="form-control" id="correo"
-                        placeholder="nombre@empresa.com">
-                </div>
+            <!-- Botones -->
+            <div class="d-flex gap-2">
+                <button type="button" class="btn btn-back" onclick="volver()">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </button>
+                <button type="submit" class="btn btn-submit flex-grow-1">
+                    <i class="bi bi-send"></i> Enviar Reporte
+                </button>
+            </div>
+        </form>
 
-                <div class="d-flex gap-2">
-                    <button type="submit" class="btn btn-enviar w-100">
-                        <i class="bi bi-send"></i> Enviar Reporte
-                    </button>
-                    <button type="button" class="btn btn-secondary w-100" onclick="volver()">
-                        Cancelar
-                    </button>
-                </div>
-
-            </form>
-
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="text-center mt-4 d-none">
+            <div class="spinner-border text-danger" role="status"></div>
+            <p class="mt-2">Enviando reporte...</p>
         </div>
-    </main>
+    </div>
+</div>
 
-    <!-- JS -->
-    <script>
-        // Obtener folio desde la URL
-        const params = new URLSearchParams(window.location.search);
-        const folio = params.get("folio");
+<script>
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRVvvkis22L6snCJAekuRJlZJD56lGJyil2cET-XVycwcqCT6GMS5cO5BvbNq2gW3wUg/exec';
 
-        if (folio) {
-            document.getElementById("folioLabel").innerText = folio;
-            document.getElementById("folioInput").value = folio;
-        }
+let dashboardData = {};
 
-        function enviarReporte(e) {
-            e.preventDefault();
+// Cargar datos del dashboard al iniciar
+document.addEventListener('DOMContentLoaded', async function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const folio = urlParams.get('folio');
 
-            const data = {
-                folio: document.getElementById("folioInput").value,
-                tipo: document.getElementById("tipo").value,
-                descripcion: document.getElementById("descripcion").value,
-                correo: document.getElementById("correo").value
-            };
-
-            console.log("Reporte enviado:", data);
-
-            alert("✅ Reporte enviado correctamente. Gracias por tu apoyo.");
-
-            window.location.href = "dashboards.html";
-        }
-
-        function volver() {
+    if (!folio) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se especificó el folio del dashboard',
+        }).then(() => {
             window.history.back();
+        });
+        return;
+    }
+
+    await cargarDatosDashboard(folio);
+});
+
+// Cargar datos del dashboard desde Google Sheets
+async function cargarDatosDashboard(folio) {
+    try {
+        const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getDashboardByFolio&folio=${folio}`);
+        const data = await response.json();
+
+        if (data.dashboard) {
+            dashboardData = data.dashboard;
+            document.getElementById('dashboardFolio').textContent = dashboardData.folio;
+            document.getElementById('dashboardNombre').textContent = dashboardData.nombre;
+            document.getElementById('dashboardResponsable').textContent = 
+                `${dashboardData.responsable} (${dashboardData.correo})`;
+        } else {
+            throw new Error('Dashboard no encontrado');
         }
-    </script>
+    } catch (error) {
+        console.error('Error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'No se pudieron cargar los datos del dashboard',
+        }).then(() => {
+            window.history.back();
+        });
+    }
+}
+
+// Enviar reporte
+document.getElementById('reportForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    loadingIndicator.classList.remove('d-none');
+
+    const reporteData = {
+        action: 'saveReporte',
+        folioDashboard: dashboardData.folio,
+        nombreDashboard: dashboardData.nombre,
+        tipoProblema: document.getElementById('tipoProblema').value,
+        nombreReportante: document.getElementById('nombreReportante').value,
+        correoReportante: document.getElementById('correoReportante').value,
+        descripcion: document.getElementById('descripcion').value,
+        responsableDashboard: dashboardData.responsable,
+        correoResponsable: dashboardData.correo
+    };
+
+    try {
+        const formData = new URLSearchParams();
+        for (const key in reporteData) {
+            formData.append(key, reporteData[key]);
+        }
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        loadingIndicator.classList.add('d-none');
+
+        if (result.success) {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Reporte enviado!',
+                html: `
+                    <p><strong>Folio de reporte:</strong> ${result.folioReporte}</p>
+                    <p>Se ha notificado al responsable del dashboard.</p>
+                    <p class="text-muted small">Recibirás una respuesta a tu correo</p>
+                `,
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                window.history.back();
+            });
+        } else {
+            throw new Error(result.error || 'Error desconocido');
+        }
+
+    } catch (error) {
+        loadingIndicator.classList.add('d-none');
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al enviar',
+            text: error.message
+        });
+    }
+});
+
+function volver() {
+    window.history.back();
+}
+</script>
 
 </body>
-
 </html>
