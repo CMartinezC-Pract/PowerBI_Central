@@ -1,81 +1,204 @@
-# PowerBI Central - Portal
 
-## 🔧 Problema Resuelto
 
-El error "Cannot GET /inicio.html" ocurría porque:
-1. Los archivos HTML estaban todos juntos en un solo archivo
-2. Intentabas abrirlos directamente desde el sistema de archivos sin un servidor
+```markdown
+# 📊 Power BI Central
 
-## 📁 Estructura de Archivos
+Plataforma web para la gestión y visualización centralizada de dashboards de Power BI mediante un sistema de folios dinámicos.
+
+El proyecto permite:
+- Registrar dashboards
+- Consultarlos por folio
+- Visualizarlos en un visor dedicado
+- Reportar problemas
+- Administrar todo desde Google Sheets como base de datos
+
+---
+
+## 🚀 Tecnologías Utilizadas
+
+- HTML5
+- CSS3 (Bootstrap 5)
+- JavaScript (Vanilla JS)
+- Power BI Embed
+- Google Apps Script (Backend API)
+- Google Sheets (Base de datos)
+- GitHub (Control de versiones)
+- Vercel (Hosting)
+
+---
+
+## 🏗 Arquitectura del Proyecto
 
 ```
-powerbi-central/
-├── index.html          (página principal con el layout)
-├── inicio.html         (página de bienvenida)
-├── dashboards.html     (catálogo de dashboards)
-├── reporte-error.html  (formulario de reporte)
-├── css/
-│   └── site.css        (estilos personalizados)
-├── servidor.py         (servidor HTTP simple)
-└── README.md          (este archivo)
+
+Usuario → Vercel (Frontend)
+
+↓
+
+Google Apps Script (API REST)
+
+↓
+
+Google Sheets (Base de datos)
+
+↓
+
+Power BI (Dashboards embebidos)
+
 ```
 
-## 🚀 Cómo Ejecutar
+---
 
-### Opción 1: Con Python (Recomendado)
+## 📂 Estructura del Proyecto
 
-1. Abre una terminal/CMD en la carpeta donde están los archivos
-2. Ejecuta:
-   ```bash
-   python servidor.py
-   ```
-3. Abre tu navegador en: http://localhost:8000/index.html
-
-### Opción 2: Con Python (alternativa simple)
-
-```bash
-python -m http.server 8000
 ```
 
-Luego abre: http://localhost:8000/index.html
+/
+│
+├── index.html                # Página principal
+├── visor-dashboard.html      # Página para visualizar dashboard por folio
+├── reporte-error.html        # Página para reportar errores
+├── assets/                   # Recursos adicionales (si existen)
+└── README.md
 
-### Opción 3: Con Node.js (si tienes instalado)
-
-```bash
-npx http-server -p 8000
 ```
 
-### Opción 4: Con Live Server (VS Code)
+---
 
-Si usas Visual Studio Code:
-1. Instala la extensión "Live Server"
-2. Haz clic derecho en `index.html`
-3. Selecciona "Open with Live Server"
+## ⚙️ ¿Cómo Funciona?
 
-## ✅ Verificación
+### 1️⃣ Registro de Dashboards
+Los dashboards se almacenan en una hoja de cálculo de Google Sheets con los siguientes campos:
 
-Una vez iniciado el servidor, deberías ver:
-- ✅ Navegación funcional entre páginas
-- ✅ El iframe cargando correctamente
-- ✅ Todos los estilos aplicados
-- ✅ Enlaces funcionando correctamente
+- Folio
+- Nombre
+- URL del Dashboard
+- Estado
+- Fecha de registro
 
-## 📝 Notas Importantes
+---
 
-- **NO** abras los archivos directamente con doble clic (file://)
-- **SÍ** usa siempre un servidor HTTP local
-- Los iframes requieren un servidor para funcionar correctamente
-- El enlace de Power BI se abre en una nueva pestaña
+### 2️⃣ API con Google Apps Script
 
-## 🎨 Personalización
+Se utiliza un Web App de Google Apps Script que:
 
-Para personalizar los estilos, edita: `css/site.css`
+- Recibe solicitudes GET y POST
+- Consulta la hoja de cálculo
+- Devuelve datos en formato JSON
 
-## ❓ ¿Problemas?
+Ejemplo de endpoint:
 
-Si el puerto 8000 está ocupado, cambia el número en `servidor.py` o usa otro puerto:
-```bash
-python -m http.server 8080
 ```
 
-¡Listo! Tu portal PowerBI Central debería funcionar perfectamente ahora. 🎉
+?action=getDashboardByFolio&folio=DB-001
+
+```
+
+---
+
+### 3️⃣ Visualización del Dashboard
+
+Cuando el usuario accede a:
+
+```
+
+visor-dashboard.html?folio=DB-001
+
+```
+
+El sistema:
+
+1. Obtiene el parámetro `folio`
+2. Consulta la API
+3. Recibe la URL del dashboard
+4. La carga dinámicamente en un `<iframe>`
+
+---
+
+## 🔐 Seguridad
+
+Actualmente el sistema:
+
+- No tiene autenticación integrada
+- Depende del tipo de enlace de Power BI
+
+### Opciones de seguridad:
+
+- 🔓 Publish to Web (público)
+- 🔐 Secure Embed con autenticación Azure AD (recomendado para datos privados)
+- 🔑 Power BI Embedded con token
+
+---
+
+## 🌐 Despliegue
+
+El proyecto está desplegado en:
+
+**Vercel**
+```
+
+[https://power-bi-central-nine.vercel.app/](https://power-bi-central-nine.vercel.app/)
+
+```
+
+Cada vez que se hace push a GitHub, Vercel despliega automáticamente la nueva versión.
+
+---
+
+## 🛠 Cómo Ejecutarlo Localmente
+
+1. Clonar el repositorio:
+
+```
+
+git clone [https://github.com/CMartinezC-Pract/PowerBI_Central.git](https://github.com/CMartinezC-Pract/PowerBI_Central.git)
+
+```
+
+2. Abrir el archivo `index.html` en el navegador.
+
+No requiere instalación de dependencias.
+
+---
+
+## 📌 Requisitos Importantes
+
+Para que los dashboards funcionen correctamente:
+
+- El enlace debe ser tipo `Publish to Web`
+  o
+- Debe configurarse autenticación adecuada en Power BI
+
+Si se usa un enlace normal de `app.powerbi.com`, el iframe mostrará:
+
+```
+
+app.powerbi.com rechazó la conexión
+
+```
+
+---
+
+## 📈 Futuras Mejoras
+
+- Sistema de login con Microsoft
+- Control de acceso por roles
+- Registro de auditoría
+- Panel administrativo protegido
+- Token dinámico para Power BI Embedded
+
+---
+
+## 👨‍💻 Autor
+
+Proyecto desarrollado como sistema de centralización y visualización de dashboards Power BI.
+
+---
+
+## 📄 Licencia
+
+Proyecto de uso empresarial interno.
+```
+
+---
+
