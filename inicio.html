@@ -157,10 +157,11 @@
                     </a>
 
                     <!-- Botón derecho -->
-                    <button type="button" class="btn btn-add-dashboard" data-bs-toggle="modal"
+                    <a type="button" class="btn btn-add-dashboard" data-bs-toggle="modal"
                         data-bs-target="#addDashboardModal">
-                        <i class="bi bi-plus-circle"></i> Agregar Dashboard
-                    </button>
+                        <i class="bi bi-gear"></i> Administrar Dashboards
+                    </a>
+
                 </div>
             </div>
         </section>
@@ -218,9 +219,9 @@
 
                             <!-- Descripción -->
                             <div class="mb-3">
-                                <label for="descripcion" class="form-label">Descripción (Opcional)</label>
-                                <textarea class="form-control" id="descripcion" rows="3"
-                                    placeholder="Breve descripción del dashboard"></textarea>
+                                <label for="descripcion" class="form-label required-field">Descripción </del></label>
+                                <textarea class="form-control" id="descripcion" rows="2"
+                                    placeholder="Breve descripción de Dashboard, Funcionalidad y Propósito"></textarea>
                             </div>
 
                             <!-- URL del Dashboard -->
@@ -244,7 +245,7 @@
                             <div class="mb-3">
                                 <label for="correo" class="form-label required-field">Correo del Responsable:</label>
                                 <input type="email" class="form-control" id="correo" name="correo"
-                                    placeholder="correo@empresa.com" required>
+                                    placeholder="correo@xcaret.com" required>
                             </div>
 
 
