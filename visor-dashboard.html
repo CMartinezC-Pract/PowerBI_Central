@@ -7,6 +7,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
 body{
@@ -138,6 +139,167 @@ iframe{
     0%{transform:rotate(0deg);}
     100%{transform:rotate(360deg);}
 }
+
+/* Modal de Reporte */
+.report-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.report-modal.active {
+    display: flex;
+}
+
+.modal-content-report {
+    background: white;
+    border-radius: 16px;
+    max-width: 700px;
+    width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.report-header {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    color: white;
+    padding: 25px 30px;
+    border-radius: 16px 16px 0 0;
+    position: relative;
+}
+
+.report-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg);
+}
+
+.report-body {
+    padding: 30px;
+}
+
+.dashboard-info-modal {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.dashboard-info-modal h5 {
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.dashboard-info-modal p {
+    margin-bottom: 8px;
+    color: #6c757d;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.required:after {
+    content: " *";
+    color: #dc3545;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px 14px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.btn-submit {
+    background: #dc3545;
+    color: white;
+    padding: 12px 30px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    transition: all 0.3s;
+}
+
+.btn-submit:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.btn-cancel {
+    background: #6c757d;
+    color: white;
+    padding: 12px 30px;
+    border: none;
+    border-radius: 8px;
+}
+
+.btn-cancel:hover {
+    background: #5a6268;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-actions {
+        gap: 5px;
+    }
+    
+    .btn-action span {
+        display: none;
+    }
+    
+    .modal-content-report {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .report-body {
+        padding: 20px;
+    }
+}
 </style>
 </head>
 
@@ -159,10 +321,10 @@ iframe{
             <span class="d-none d-md-inline">Pantalla Completa</span>
         </button>
 
-        <a href="#" id="btnReportar" class="btn-action btn-report">
+        <button onclick="abrirModalReporte()" class="btn-action btn-report">
             <i class="bi bi-exclamation-triangle"></i>
             <span class="d-none d-md-inline">Reportar</span>
-        </a>
+        </button>
     </div>
 </div>
 
@@ -175,11 +337,83 @@ iframe{
     <iframe id="dashboardFrame" src="about:blank"></iframe>
 </div>
 
+<!-- Modal de Reporte -->
+<div id="reportModal" class="report-modal">
+    <div class="modal-content-report">
+        <div class="report-header">
+            <button class="modal-close" onclick="cerrarModalReporte()">&times;</button>
+            <h2><i class="bi bi-exclamation-triangle-fill"></i> Reportar Problema</h2>
+            <p class="mb-0" style="font-size: 0.95rem; opacity: 0.9;">Ayúdanos a mejorar reportando cualquier inconveniente</p>
+        </div>
+
+        <div class="report-body">
+            <!-- INFO DEL DASHBOARD -->
+            <div class="dashboard-info-modal">
+                <h5><i class="bi bi-info-circle"></i> Dashboard a reportar</h5>
+                <p class="mb-1"><strong>Folio:</strong> <span id="modalFolio">-</span></p>
+                <p class="mb-1"><strong>Nombre:</strong> <span id="modalNombre">-</span></p>
+                <p class="mb-0"><strong>Responsable:</strong> <span id="modalResponsable">-</span></p>
+            </div>
+
+            <!-- FORMULARIO -->
+            <form id="reportForm">
+                <!-- Tipo de Problema -->
+                <div class="mb-3">
+                    <label for="tipoProblema" class="form-label required">Tipo de Problema</label>
+                    <select class="form-select" id="tipoProblema" required>
+                        <option value="">Seleccione un tipo de problema</option>
+                        <option value="Datos incorrectos">Datos incorrectos</option>
+                        <option value="Dashboard no carga">Dashboard no carga</option>
+                        <option value="Error de visualización">Error de visualización</option>
+                        <option value="Información desactualizada">Información desactualizada</option>
+                        <option value="No tengo permisos de acceso">No tengo permisos de acceso</option>
+                        <option value="Otro problema">Otro problema</option>
+                    </select>
+                </div>
+
+                <!-- Nombre -->
+                <div class="mb-3">
+                    <label for="nombreReportante" class="form-label required">Tu Nombre</label>
+                    <input type="text" class="form-control" id="nombreReportante" placeholder="Nombre completo" required>
+                </div>
+
+                <!-- Correo -->
+                <div class="mb-3">
+                    <label for="correoReportante" class="form-label required">Tu Correo</label>
+                    <input type="email" class="form-control" id="correoReportante" placeholder="correo@xcaret.com" required>
+                </div>
+
+                <!-- Descripción -->
+                <div class="mb-4">
+                    <label for="descripcion" class="form-label">Descripción del Problema (Opcional)</label>
+                    <textarea class="form-control" id="descripcion" rows="3" 
+                        placeholder="Proporciona detalles adicionales que puedan ayudar a resolver el problema..." 
+                        maxlength="500"></textarea>
+                    <div class="form-text">Máximo 500 caracteres</div>
+                </div>
+
+                <!-- Botones -->
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-cancel" onclick="cerrarModalReporte()">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-submit flex-grow-1">
+                        <i class="bi bi-send"></i> Enviar Reporte
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
 const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxRVvvkis22L6snCJAekuRJlZJD56lGJyil2cET-XVycwcqCT6GMS5cO5BvbNq2gW3wUg/exec';
 
-document.addEventListener('DOMContentLoaded', async function() {
+let dashboardData = {};
 
+document.addEventListener('DOMContentLoaded', async function() {
     const urlParams = new URLSearchParams(window.location.search);
     const folio = urlParams.get('folio');
 
@@ -202,10 +436,17 @@ async function cargarDashboard(folio){
         const data = await response.json();
 
         if(data.dashboard){
+            dashboardData = data.dashboard;
+            
             document.getElementById('folio').textContent = data.dashboard.folio;
             document.getElementById('nombre').textContent = data.dashboard.nombre;
             document.getElementById('dashboardFrame').src = data.dashboard.url;
-            document.getElementById('btnReportar').href = `reporte-error.html?folio=${data.dashboard.folio}`;
+            
+            // Llenar datos del modal
+            document.getElementById('modalFolio').textContent = data.dashboard.folio;
+            document.getElementById('modalNombre').textContent = data.dashboard.nombre;
+            document.getElementById('modalResponsable').textContent = 
+                `${data.dashboard.responsable} (${data.dashboard.correo})`;
         }else{
             alert('Dashboard no encontrado');
             window.history.back();
@@ -217,6 +458,91 @@ async function cargarDashboard(folio){
         window.history.back();
     }
 }
+
+/* Modal de Reporte */
+function abrirModalReporte() {
+    document.getElementById('reportModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function cerrarModalReporte() {
+    document.getElementById('reportModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+    // Limpiar formulario
+    document.getElementById('reportForm').reset();
+}
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('reportModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        cerrarModalReporte();
+    }
+});
+
+// Enviar reporte
+document.getElementById('reportForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const reporteData = {
+        action: 'saveReporte',
+        folioDashboard: dashboardData.folio,
+        nombreDashboard: dashboardData.nombre,
+        tipoProblema: document.getElementById('tipoProblema').value,
+        nombreReportante: document.getElementById('nombreReportante').value,
+        correoReportante: document.getElementById('correoReportante').value,
+        descripcion: document.getElementById('descripcion').value,
+        responsableDashboard: dashboardData.responsable,
+        correoResponsable: dashboardData.correo
+    };
+
+    try {
+        // Mostrar loading
+        Swal.fire({
+            title: 'Enviando reporte...',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
+        const formData = new URLSearchParams();
+        for (const key in reporteData) {
+            formData.append(key, reporteData[key]);
+        }
+
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            cerrarModalReporte();
+            Swal.fire({
+                icon: 'success',
+                title: '¡Reporte enviado!',
+                html: `
+                    <p><strong>Folio de reporte:</strong> ${result.folioReporte}</p>
+                    <p>Se ha notificado al responsable del dashboard.</p>
+                    <p class="text-muted small">Recibirás una respuesta a tu correo</p>
+                `,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#28a745'
+            });
+        } else {
+            throw new Error(result.error || 'Error desconocido');
+        }
+
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error al enviar',
+            text: error.message,
+            confirmButtonColor: '#dc3545'
+        });
+    }
+});
 
 /* Fullscreen */
 function toggleFullscreen(){
